@@ -6,6 +6,36 @@ SPDX-License-Identifier: CC0-1.0
 # Jupyter
 Place this app in **nextcloud/apps/**
 
+## Configuring JupyterHub
+You need to configure csp headers for JupyterHub before it can be embedded in Nextcloud.
+That can be done in the values.yaml, if you deploy JupyterHub using Helm.
+
+You should probably not use '*' as shown here, but instead specify your domain:
+
+```
+hub:
+  config:
+    JupyterHub:
+      tornado_settings:
+        headers: { 'Content-Security-Policy': "frame-ancestors *;" }
+      allow_origin: '*'
+singleuser:
+  image:
+    name: jupyter/scipy-notebook
+    tag: 2023-02-28
+  extraFiles:
+    jupyter_notebook_config:
+      mountPath: /home/jovyan/.jupyter/jupyter_server_config.py
+      stringData: |
+        c = get_config()
+        c.NotebookApp.allow_origin = '*'
+        c.NotebookApp.tornado_settings = {
+            'headers': { 'Content-Security-Policy': "frame-ancestors *;" }
+        }
+
+      mode: 0644
+```
+
 ## Building the app
 
 The app can be built by using the provided Makefile by running:
