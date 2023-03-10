@@ -9,11 +9,15 @@ use OCA\Jupyter\AppInfo\Application;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\IRequest;
+use OCP\IUserSession;
 use OCP\Util;
 
 class PageController extends Controller {
-	public function __construct(IRequest $request) {
+	private $userId;
+	public function __construct(IRequest $request, $userId, IUserSession $userSession) {
 		parent::__construct(Application::APP_ID, $request);
+		$this->userId = $userId;
+		$this->userSession = $userSession;
 	}
 
 	/**
@@ -21,8 +25,27 @@ class PageController extends Controller {
 	 * @NoCSRFRequired
 	 */
 	public function index(): TemplateResponse {
-		Util::addScript(Application::APP_ID, 'jupyter-main');
+		//Util::addScript(Application::APP_ID, 'jupyter-main');
+		$policy = new \OCP\AppFramework\Http\EmptyContentSecurityPolicy();
 
-		return new TemplateResponse(Application::APP_ID, 'main');
+		$userId = $this->userSession->getUser()->getUID();
+		$url = 'https://jupyter.drive.test.sunet.se/user/' .$userId . '/lab';
+		$parsed_url = parse_url($url);
+
+		$http = $parsed_url["scheme"] . "://" . $parsed_url["host"];
+		$policy->addAllowedConnectDomain($http);
+		$policy->addAllowedScriptDomain($http);
+		$policy->addAllowedFrameDomain($http);
+		\OC::$server->getContentSecurityPolicyManager()->addDefaultPolicy($policy);
+
+
+		$params = [
+		    'user_id' => $userId,
+		    'url' => $url,
+		];
+
+		return new TemplateResponse(Application::APP_ID, "main", $params);
+
+
 	}
 }
