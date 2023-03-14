@@ -3,7 +3,7 @@
 $(document).ready(function() {
   var app = "jupyter"
   // getValue(app, key, defaultValue, options)
-  var url =  OCP.AppConfig.getValue(app, 'jupyterURL', 'Url to your JupyterHub');
+  var url =  OC.AppConfig.getValue(app, 'jupyterURL');
   document.getElementById('jupyter_url').value = url;
 
   $('#jupyter_submit').on('click', function(event) {
@@ -11,7 +11,7 @@ $(document).ready(function() {
     OC.msg.startSaving('#jupyterSettings .msg');
 
     var urlValue = document.getElementById('jupyter_url').value;
-    OCP.AppConfig.setValue(app, 'jupyterURL', urlValue);
+    OC.AppConfig.setValue(app, 'jupyterURL', urlValue);
     OC.msg.finishedSaving('#jupyterSettings .msg', { status: 'success', data: { message: t('jupyter', 'Saved.') } });
   });
 
