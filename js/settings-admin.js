@@ -14,6 +14,7 @@ $(document).ready(function() {
 			url.val(urlValue);
 		}
 		OC.AppConfig.setValue(app, url.attr('name'), url.val());
+    alert(url)
     OC.msg.finishedSaving('#jupyterSettings .msg', { status: 'success', data: { message: t('jupyter', 'Saved.') } });
   });
 
