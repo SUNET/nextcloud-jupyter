@@ -10,7 +10,6 @@ use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\IRequest;
 use OCP\IUserSession;
-use OCP\Util;
 
 class PageController extends Controller {
 	private $userId;
@@ -41,7 +40,7 @@ class PageController extends Controller {
 
 		$params = [
 		    'user_id' => $userId,
-		    'url' => $url,
+		    'jupyter_url' => $url,
 		];
 
 		return new TemplateResponse(Application::APP_ID, "main", $params);
