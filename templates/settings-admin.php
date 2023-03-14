@@ -13,10 +13,12 @@ script('jupyter', 'settings-admin');
     <a target="_blank" rel="noreferrer" class="icon-info" title="<?php p($l->t('Open documentation')); ?>" href="https://jupyter.org/hub"></a>
 
     <form id="jupyter-settings">
-        <input type="text" name="jupyterURL" id="cloud_url" class="text" <?php if (!empty($_["jupyterURL"])) { ?> value="<?php print_unescaped($_['jupyterURL']); ?>" <?php } ?> placeholder="<?php p($l->t('url to jupyter instance')); ?>" />
         <label for="jupyterURL">
             <?php p($l->t('Specify here the URL, where the Nextcloud instance can find your jupyter instance e.g. https://jupyter.drive.sunet.se.')); ?>
         </label>
+        <br/>
+        <input type="text" name="jupyterURL" id="cloud_url" class="text" <?php if (!empty($_["jupyterURL"])) { ?> value="<?php print_unescaped($_['jupyterURL']); ?>" <?php } ?> placeholder="<?php p($l->t('url to jupyter instance')); ?>" width="100%"/>
+        <br/>
         <input id="jupyter_submit" type="button" class="button" value="<?php p($l->t('Save')); ?>">
         <span class="msg"></span>
     </form>
