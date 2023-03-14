@@ -66,7 +66,6 @@ class AdminPanel implements ISettings
       'user_id' => $userId,
       'urlGenerator' => $this->urlGenerator,
       "jupyterURL" => $this->urlService->getURL(),
-      "oauthname" => $this->jupyterService->getOauthValue(),
     ];
     $t = new TemplateResponse($this->appName, 'settings-admin', $params);
     return $t;
