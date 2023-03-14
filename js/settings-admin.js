@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 $(document).ready(function() {
   var app = "jupyter"
-  var url =  OC.AppConfig.getValue(app, 'jupyterURL');
+  // getValue(app, key, defaultValue, options)
+  var url =  OCP.AppConfig.getValue(app, 'jupyterURL', 'Url to your JupyterHub');
   document.getElementById('jupyter_url').value = url;
 
   $('#jupyter_submit').on('click', function(event) {
@@ -10,7 +11,7 @@ $(document).ready(function() {
     OC.msg.startSaving('#jupyterSettings .msg');
 
     var urlValue = document.getElementById('jupyter_url').value;
-    OC.AppConfig.setValue(app, 'jupyterURL', urlValue);
+    OCP.AppConfig.setValue(app, 'jupyterURL', urlValue);
     OC.msg.finishedSaving('#jupyterSettings .msg', { status: 'success', data: { message: t('jupyter', 'Saved.') } });
   });
 
