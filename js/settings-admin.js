@@ -18,6 +18,6 @@ $(document).ready(function () {
 		OC.msg.finishedSaving('#jupyterSettings .msg', { status: 'success', data: { message: t('jupyter', 'Saved.') } });
 	});
 
-	$('.section .icon-info').tipsy({ gravity: 'w' });
+	//$('.section .icon-info').tipsy({ gravity: 'w' });
 });
 
