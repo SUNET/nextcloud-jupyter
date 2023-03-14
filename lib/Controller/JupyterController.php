@@ -6,19 +6,19 @@ declare(strict_types=1);
 namespace OCA\Jupyter\Controller;
 
 use OCA\Jupyter\AppInfo\Application;
-use OCA\Jupyter\Service\NoteService;
-use OCP\AppFramework\ApiController;
+use OCA\Jupyter\Service\JupyterService;
+use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\IRequest;
 
-class NoteApiController extends ApiController {
-	private NoteService $service;
+class JupyterController extends Controller {
+	private JupyterService $service;
 	private ?string $userId;
 
 	use Errors;
 
 	public function __construct(IRequest $request,
-								NoteService $service,
+								JupyterService $service,
 								?string $userId) {
 		parent::__construct(Application::APP_ID, $request);
 		$this->service = $service;
@@ -26,8 +26,6 @@ class NoteApiController extends ApiController {
 	}
 
 	/**
-	 * @CORS
-	 * @NoCSRFRequired
 	 * @NoAdminRequired
 	 */
 	public function index(): DataResponse {
@@ -35,8 +33,6 @@ class NoteApiController extends ApiController {
 	}
 
 	/**
-	 * @CORS
-	 * @NoCSRFRequired
 	 * @NoAdminRequired
 	 */
 	public function show(int $id): DataResponse {
@@ -46,8 +42,6 @@ class NoteApiController extends ApiController {
 	}
 
 	/**
-	 * @CORS
-	 * @NoCSRFRequired
 	 * @NoAdminRequired
 	 */
 	public function create(string $title, string $content): DataResponse {
@@ -56,8 +50,6 @@ class NoteApiController extends ApiController {
 	}
 
 	/**
-	 * @CORS
-	 * @NoCSRFRequired
 	 * @NoAdminRequired
 	 */
 	public function update(int $id, string $title,
@@ -68,8 +60,6 @@ class NoteApiController extends ApiController {
 	}
 
 	/**
-	 * @CORS
-	 * @NoCSRFRequired
 	 * @NoAdminRequired
 	 */
 	public function destroy(int $id): DataResponse {
