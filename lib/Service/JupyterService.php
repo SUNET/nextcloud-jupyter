@@ -8,7 +8,7 @@ use \OCP\IConfig;
 use \OCP\IURLGenerator;
 use OCA\Jupyter\Service\UrlService;
 
-require_once __DIR__ . '/../../vendor/autoload.php';
+//require_once __DIR__ . '/../../vendor/autoload.php';
 
 use Jose\Component\KeyManagement\JWKFactory;
 use Jose\Component\Core\Util\RSAKey;
