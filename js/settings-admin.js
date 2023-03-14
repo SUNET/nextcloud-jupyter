@@ -1,17 +1,19 @@
 // SPDX-FileCopyrightText: Enrique Pérez Arnaud <eperez@emergya.com>, Mikael Nordin <kano@sunet.se>
 // SPDX-License-Identifier: AGPL-3.0-or-later
 $(document).ready(function() {
-  var app = "jupyter"
   // getValue(app, key, defaultValue, options)
-  var url =  OC.AppConfig.getValue(app, 'jupyterURL');
-  document.getElementById('jupyter_url').value = url;
-
   $('#jupyter_submit').on('click', function(event) {
+    var app = "jupyter"
     event.preventDefault();
     OC.msg.startSaving('#jupyterSettings .msg');
 
-    var urlValue = document.getElementById('jupyter_url').value;
-    OC.AppConfig.setValue(app, 'jupyterURL', urlValue);
+		var url = $("#jupyter_url");
+		var urlValue = url.val();
+		if (urlValue.endsWith("/")) {
+			urlValue = urlValue.slice(0, -1);
+			url.val(urlValue);
+		}
+		OC.AppConfig.setValue(app, url.attr('name'), url.val());
     OC.msg.finishedSaving('#jupyterSettings .msg', { status: 'success', data: { message: t('jupyter', 'Saved.') } });
   });
 
