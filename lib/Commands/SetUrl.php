@@ -22,7 +22,7 @@ class SetUrl extends Command
   public function __construct($AppName, IConfig $config, JupyterService $jupyterService)
   {
     parent::__construct();
-    $this->appName = $AppName;
+    $this->appName = 'jupyter';
     $this->config = $config;
     $this->jupyterService = $jupyterService;
   }
