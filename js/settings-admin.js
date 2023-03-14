@@ -9,7 +9,7 @@ $(document).ready(function() {
     var app = "jupyter"
     let searchParams = new URLSearchParams(window.location.search);
     var urlValue = searchParams.get('jupyter_url');
-    alert(urlValue);
+    alert(searchParams);
     OC.AppConfig.setValue(app, 'jupyterURL', urlValue);
     OC.msg.finishedSaving('#jupyterSettings .msg', { status: 'success', data: { message: t('jupyter', 'Saved.') } });
   });
