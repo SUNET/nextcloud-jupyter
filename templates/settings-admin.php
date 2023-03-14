@@ -17,7 +17,7 @@ script('jupyter', 'settings-admin');
       <?php p($l->t('Specify here the URL, where the Nextcloud instance can find your jupyter instance e.g. https://jupyter.drive.sunet.se.')); ?>
     </label>
     <br />
-    <input type="text" name="jupyter_url" id="jupyter_url" class="text" value="<?php print_unescaped( "Hallo" . "$_["jupyter_url"])?>" placeholder="url to jupyter instance" style="width: auto !important" />
+    <input type="text" name="jupyter_url" id="jupyter_url" class="text" value="<?php print_unescaped( "Hallo" . $_["jupyter_url"])?>" placeholder="url to jupyter instance" style="width: auto !important" />
     <br />
     <input id="jupyter_submit" type="button" class="button" value="<?php p($l->t('Save')); ?>">
     <span class="msg"></span>
