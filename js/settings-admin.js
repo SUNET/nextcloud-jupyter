@@ -7,7 +7,7 @@ $(document).ready(function () {
 		OC.msg.startSaving('#jupyterSettings .msg');
 
 		var app = "jupyter"
-		var url = $("#jupyter_url");
+		var url = $("#jupyterURL");
 		var urlValue = url.val();
 		if (urlValue.endsWith("/")) {
 			urlValue = urlValue.slice(0, -1);
