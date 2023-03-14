@@ -3,9 +3,7 @@
 $(document).ready(function() {
   var app = "jupyter"
   var url =  OC.AppConfig.getValue(app, 'jupyterURL');
-  if (url) {
-    document.getElementById('jupyter_url').value = url;
-  }
+  document.getElementById('jupyter_url').value = url;
 
   $('#jupyter_submit').on('click', function(event) {
     event.preventDefault();
