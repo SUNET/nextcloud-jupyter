@@ -9,14 +9,13 @@ $(document).ready(function () {
 		var app = "jupyter"
     let searchParams = new URLSearchParams(window.location.search);
     if (searchParams.has('jupyter_url')) {
-      let urlValue = searchParams.get('jupyter_url')
+      var urlValue = searchParams.get('jupyter_url')
       if (urlValue.endsWith("/")) {
         urlValue = urlValue.slice(0, -1);
       }
+      OC.AppConfig.setValue(app, 'jupyterURL', urlValue);
+      OC.msg.finishedSaving('#jupyterSettings .msg', { status: 'success', data: { message: t('jupyter', 'Saved.') } });
     }
-		OC.AppConfig.setValue(app, 'jupyterURL', urlValue);
-
-		OC.msg.finishedSaving('#jupyterSettings .msg', { status: 'success', data: { message: t('jupyter', 'Saved.') } });
 	});
 
 	//$('.section .icon-info').tipsy({ gravity: 'w' });
