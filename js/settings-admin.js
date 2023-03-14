@@ -7,13 +7,14 @@ $(document).ready(function () {
 		OC.msg.startSaving('#jupyterSettings .msg');
 
 		var app = "jupyter"
-		var url = $("#jupyterURL");
-		var urlValue = url.val();
-		if (urlValue.endsWith("/")) {
-			urlValue = urlValue.slice(0, -1);
-			url.val(urlValue);
-		}
-		OC.AppConfig.setValue(app, url.attr('name'), url.val());
+    let searchParams = new URLSearchParams(window.location.search);
+    if (searchParams.has('jupyter_url')) {
+      let urlValue = searchParams.get('jupyter_url')
+      if (urlValue.endsWith("/")) {
+        urlValue = urlValue.slice(0, -1);
+      }
+    }
+		OC.AppConfig.setValue(app, 'jupyterURL', urlValue);
 
 		OC.msg.finishedSaving('#jupyterSettings .msg', { status: 'success', data: { message: t('jupyter', 'Saved.') } });
 	});
