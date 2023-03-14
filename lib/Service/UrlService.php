@@ -15,7 +15,7 @@ class UrlService
   public function __construct($AppName, IConfig $config)
   {
     $this->config = $config;
-    $this->appName = $AppName;
+    $this->appName = "jupyter";
     $this->cloudUrlKey = "jupiterURL";
   }
 
