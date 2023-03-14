@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 // SPDX-FileCopyrightText: Mikael Nordin <kano@sunet.se>
 // SPDX-License-Identifier: AGPL-3.0-or-later
@@ -12,13 +13,8 @@ declare(strict_types=1);
  * it's instantiated in there
  */
 return [
-	'resources' => [
-		'note' => ['url' => '/notes'],
-		'note_api' => ['url' => '/api/0.1/notes']
-	],
-	'routes' => [
-		['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],
-		['name' => 'note_api#preflighted_cors', 'url' => '/api/0.1/{path}',
-			'verb' => 'OPTIONS', 'requirements' => ['path' => '.+']]
-	]
+  'resources' => [],
+  'routes' => [
+    ['name' => 'page#index', 'url' => '/', 'verb' => 'GET']
+  ]
 ];
