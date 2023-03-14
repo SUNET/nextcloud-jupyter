@@ -15,10 +15,25 @@ You should probably not use '*' as shown here, but instead specify your domain:
 ```
 hub:
   config:
+    Authenticator:
+      auto_login: true
+      enable_auth_state: true
     JupyterHub:
       tornado_settings:
         headers: { 'Content-Security-Policy': "frame-ancestors *;" }
-      allow_origin: '*'
+  extraConfig:
+    oauthCode: |
+      from oauthenticator.generic import GenericOAuthenticator
+      c.JupyterHub.authenticator_class = GenericOAuthenticator
+      c.GenericOAuthenticator.client_id = '< Client Identity from Nextcloud goes here >'
+      c.GenericOAuthenticator.client_secret = '< Client secret from Nextclouid goes here >'
+      c.GenericOAuthenticator.login_service = '< Your Service Name goes here >'
+      c.GenericOAuthenticator.username_key = lambda r: r.get('ocs', {}).get('data', {}).get('id')
+      c.GenericOAuthenticator.userdata_url = 'https://<Nextcloud domain goes here>/ocs/v2.php/cloud/user?format=json'
+      c.GenericOAuthenticator.authorize_url = 'https://<Nextcloud domain goes here>/index.php/apps/oauth2/authorize'
+      c.GenericOAuthenticator.token_url = 'https://<Nextcloud domain goes here>/index.php/apps/oauth2/api/v1/token'
+      c.GenericOAuthenticator.oauth_callback_url = 'https://<Jupyter Hub domain goes here>/hub/oauth_callback'
+
 singleuser:
   image:
     name: jupyter/scipy-notebook
@@ -36,36 +51,12 @@ singleuser:
       mode: 0644
 ```
 
-## Building the app
-
-The app can be built by using the provided Makefile by running:
-
-    make
-
-This requires the following things to be present:
-* make
-* which
-* tar: for building the archive
-* curl: used if phpunit and composer are not installed to fetch them from the web
-* npm: for building and testing everything JS, only required if a package.json is placed inside the **js/** folder
-
-The make command will install or update Composer dependencies if a composer.json is present and also **npm run build** if a package.json is present in the **js/** folder. The npm **build** script should use local paths for build systems and package managers, so people that simply want to build the app won't need to install npm libraries globally, e.g.:
-
-**package.json**:
-```json
-"scripts": {
-    "test": "node node_modules/gulp-cli/bin/gulp.js karma",
-    "prebuild": "npm install && node_modules/bower/bin/bower install && node_modules/bower/bin/bower update",
-    "build": "node node_modules/gulp-cli/bin/gulp.js"
-}
-```
-
 
 ## Publish to App Store
 
 First get an account for the [App Store](http://apps.nextcloud.com/) then run:
 
-    make && make appstore
+    make appstore
 
 The archive is located in build/artifacts/appstore and can then be uploaded to the App Store.
 
