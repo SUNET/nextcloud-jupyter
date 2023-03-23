@@ -33,7 +33,7 @@ class PageController extends Controller
     parent::__construct(Application::APP_ID, $request);
     $this->appName = "jupyter";
     $this->userId = $userSession->getUser()->getUID();
-    $this->jupyter_url = $config->getAppValue($this->appName, 'jupyter_url') . '/' . $this->userId . '/lab';
+    $this->jupyter_url = $config->getAppValue($this->appName, 'jupyter_url') . '/hub/home';
   }
 
   /**
