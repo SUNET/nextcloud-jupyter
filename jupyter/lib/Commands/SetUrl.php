@@ -40,7 +40,7 @@ class SetUrl extends Command
   /**
    * @param InputInterface $input
    * @param OutputInterface $output
-   * @return int|void
+   * @return int
    * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException
    */
   protected function execute(InputInterface $input, OutputInterface $output)
@@ -48,5 +48,6 @@ class SetUrl extends Command
     $url = $input->getArgument('url');
     $this->config->setAppValue($this->appName, 'jupyter_url', $url);
     $output->writeln("Set <$url> as jupyter_url successful.");
+    return 0;
   }
 }

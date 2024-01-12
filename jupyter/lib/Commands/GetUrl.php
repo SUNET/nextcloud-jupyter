@@ -34,12 +34,13 @@ class GetUrl extends Command
   /**
    * @param InputInterface $input
    * @param OutputInterface $output
-   * @return int|void
+   * @return int
    * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException
    */
   protected function execute(InputInterface $input, OutputInterface $output)
   {
     $url = $this->config->getAppValue($this->appName, 'jupyter_url');
     $output->writeln($url);
+    return 0;
   }
 }
