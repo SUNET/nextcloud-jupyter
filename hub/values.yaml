@@ -1,3 +1,5 @@
+debug:
+  enabled: true
 hub:
   config:
     Authenticator:
@@ -6,49 +8,287 @@ hub:
     JupyterHub:
       tornado_settings:
         headers: { 'Content-Security-Policy': "frame-ancestors *;" }
+  db:
+    pvc:
+      storageClassName: csi-sc-cinderplugin
   extraConfig:
     oauthCode: |
-      # This is NextcloudOAuthenticator.py
+      import time
+      import requests
+      from datetime import datetime
       from oauthenticator.generic import GenericOAuthenticator
-      import os
+      token_url = 'https://' + os.environ['NEXTCLOUD_HOST'] + '/index.php/apps/oauth2/api/v1/token'
+      debug = os.environ.get('NEXTCLOUD_DEBUG_OAUTH', 'false').lower() in ['true', '1', 'yes']
 
+      def get_nextcloud_access_token(refresh_token):
+        client_id = os.environ['NEXTCLOUD_CLIENT_ID']
+        client_secret = os.environ['NEXTCLOUD_CLIENT_SECRET']
+
+        code = refresh_token
+        data = {
+          'grant_type': 'refresh_token',
+          'code': code,
+          'refresh_token': refresh_token,
+          'client_id': client_id,
+          'client_secret': client_secret
+        }
+        response = requests.post(token_url, data=data)
+        if debug:
+          print(response.text)
+        return response.json()
 
       def post_auth_hook(authenticator, handler, authentication):
-          user = authentication['auth_state']['oauth_user']['ocs']['data']['id']
-          auth_state = authentication['auth_state']
-          authenticator.user_dict[user] = auth_state
-          return authentication
-
+        user = authentication['auth_state']['oauth_user']['ocs']['data']['id']
+        auth_state = authentication['auth_state']
+        auth_state['token_expires'] =  time.time() + auth_state['token_response']['expires_in']
+        authentication['auth_state'] = auth_state
+        return authentication
 
       class NextcloudOAuthenticator(GenericOAuthenticator):
+        def __init__(self, *args, **kwargs):
+          super().__init__(*args, **kwargs)
+          self.user_dict = {}
 
-          def __init__(self, *args, **kwargs):
-              super().__init__(*args, **kwargs)
-              self.user_dict = {}
+        async def pre_spawn_start(self, user, spawner):
+          super().pre_spawn_start(user, spawner)
+          auth_state = await user.get_auth_state()
+          if not auth_state:
+            return
+          access_token = auth_state['access_token']
+          spawner.environment['NEXTCLOUD_ACCESS_TOKEN'] = access_token
 
-          def pre_spawn_start(self, user, spawner):
-              super().pre_spawn_start(user, spawner)
-              access_token = self.user_dict[user.name]['access_token']
-              #refresh_token = self.user_dict[user.name]['refresh_token']
-              spawner.environment['NEXTCLOUD_ACCESS_TOKEN'] = access_token
-
+        async def refresh_user(self, user, handler=None):
+          auth_state = await user.get_auth_state()
+          if not auth_state:
+            if debug:
+              print(f'auth_state missing for {user}')
+            return False
+          access_token = auth_state['access_token']
+          refresh_token = auth_state['refresh_token']
+          token_response = auth_state['token_response']
+          now = time.time()
+          now_hr = datetime.fromtimestamp(now)
+          expires = auth_state['token_expires']
+          expires_hr = datetime.fromtimestamp(expires)
+          expires = 0
+          if debug:
+            print(f'auth_state for {user}: {auth_state}')
+          if now >= expires:
+            if debug:
+              print(f'Time is: {now_hr}, token expired: {expires_hr}')
+              print(f'Refreshing token for {user}')
+            try:
+              token_response = get_nextcloud_access_token(refresh_token)
+              auth_state['access_token'] = token_response['access_token']
+              auth_state['refresh_token'] = token_response['refresh_token']
+              auth_state['token_expires'] = now + token_response['expires_in']
+              auth_state['token_response'] = token_response
+              if debug:
+                print(f'Successfully refreshed token for {user.name}')
+                print(f'auth_state for {user.name}: {auth_state}')
+              return {'name': user.name, 'auth_state': auth_state}
+            except Exception as e:
+              if debug:
+                print(f'Failed to refresh token for {user}')
+              return False
+            return False
+          if debug:
+            print(f'Time is: {now_hr}, token expires: {expires_hr}')
+          return True
 
       c.JupyterHub.authenticator_class = NextcloudOAuthenticator
       c.NextcloudOAuthenticator.client_id = os.environ['NEXTCLOUD_CLIENT_ID']
       c.NextcloudOAuthenticator.client_secret = os.environ['NEXTCLOUD_CLIENT_SECRET']
       c.NextcloudOAuthenticator.login_service = 'Sunet Drive'
-      c.NextcloudOAuthenticator.username_key = lambda r: r.get('ocs', {}).get(
-          'data', {}).get('id')
+      c.NextcloudOAuthenticator.username_claim = lambda r: r.get('ocs', {}).get('data', {}).get('id')
       c.NextcloudOAuthenticator.userdata_url = 'https://' + os.environ['NEXTCLOUD_HOST'] + '/ocs/v2.php/cloud/user?format=json'
       c.NextcloudOAuthenticator.authorize_url = 'https://' + os.environ['NEXTCLOUD_HOST'] + '/index.php/apps/oauth2/authorize'
-      c.NextcloudOAuthenticator.token_url = 'https://' + os.environ['NEXTCLOUD_HOST'] + '/index.php/apps/oauth2/api/v1/token'
+      c.NextcloudOAuthenticator.token_url = token_url
       c.NextcloudOAuthenticator.oauth_callback_url = 'https://' + os.environ['JUPYTER_HOST'] + '/hub/oauth_callback'
+      c.NextcloudOAuthenticator.allow_all = True
       c.NextcloudOAuthenticator.refresh_pre_spawn = True
       c.NextcloudOAuthenticator.enable_auth_state = True
+      c.NextcloudOAuthenticator.auth_refresh_age = 3600
       c.NextcloudOAuthenticator.post_auth_hook = post_auth_hook
+
+    serviceCode: |
+      import sys
+      c.JupyterHub.load_roles = [
+          {
+              "name": "refresh-token",
+              "services": [
+                "refresh-token"
+              ],
+              "scopes": [
+                "read:users",
+                "admin:auth_state"
+              ]
+          },
+          {
+              "name": "user",
+              "scopes": [
+                "access:services!service=refresh-token",
+                "read:services!service=refresh-token",
+                "self",
+              ],
+          },
+          {
+              "name": "server",
+              "scopes": [
+                "access:services!service=refresh-token",
+                "read:services!service=refresh-token",
+                "inherit",
+              ],
+          }
+      ]
+      c.JupyterHub.services = [
+          {
+              'name': 'refresh-token',
+              'url': 'http://' + os.environ.get('HUB_SERVICE_HOST', 'hub') + ':' + os.environ.get('HUB_SERVICE_PORT_REFRESH_TOKEN', '8082'),
+              'display': False,
+              'oauth_no_confirm': True,
+              'api_token': os.environ['JUPYTERHUB_API_KEY'],
+              'command': [sys.executable, '/usr/local/etc/jupyterhub/refresh-token.py']
+          }
+      ]
+      c.JupyterHub.admin_users = {"refresh-token"}
+      c.JupyterHub.api_tokens = {
+          os.environ['JUPYTERHUB_API_KEY']: "refresh-token",
+      }
+  extraFiles:
+    refresh-token.py: 
+      mountPath: /usr/local/etc/jupyterhub/refresh-token.py
+      stringData: |
+        """A token refresh service authenticating with the Hub.
+
+        This service serves `/services/refresh-token/`,
+        authenticated with the Hub,
+        showing the user their own info.
+        """
+        import json
+        import os
+        import requests
+        import socket
+        from jupyterhub.services.auth import HubAuthenticated
+        from jupyterhub.utils import url_path_join
+        from tornado.httpserver import HTTPServer
+        from tornado.ioloop import IOLoop
+        from tornado.web import Application, HTTPError, RequestHandler, authenticated
+        from urllib.parse import urlparse
+        debug = os.environ.get('NEXTCLOUD_DEBUG_OAUTH', 'false').lower() in ['true', '1', 'yes']
+        def my_debug(s):
+          if debug:
+            with open("/proc/1/fd/1", "a") as stdout:
+              print(s, file=stdout)
+
+
+        class RefreshHandler(HubAuthenticated, RequestHandler):
+            def api_request(self, method, url, **kwargs):
+                my_debug(f'{self.hub_auth}')
+                url = url_path_join(self.hub_auth.api_url, url)
+                allow_404 = kwargs.pop('allow_404', False)
+                headers = kwargs.setdefault('headers', {})
+                headers.setdefault('Authorization', f'token {self.hub_auth.api_token}')
+                try:
+                    r = requests.request(method, url, **kwargs)
+                except requests.ConnectionError as e:
+                    my_debug(f'Error connecting to {url}: {e}')
+                    msg = f'Failed to connect to Hub API at {url}.'
+                    msg += f'  Is the Hub accessible at this URL (from host: {socket.gethostname()})?'
+
+                    if '127.0.0.1' in url:
+                        msg += '  Make sure to set c.JupyterHub.hub_ip to an IP accessible to' + \
+                               ' single-user servers if the servers are not on the same host as the Hub.'
+                    raise HTTPError(500, msg)
+
+                data = None
+                if r.status_code == 404 and allow_404:
+                    pass
+                elif r.status_code == 403:
+                    my_debug(
+                        'Lacking permission to check authorization with JupyterHub,' + 
+                        f' my auth token may have expired: [{r.status_code}] {r.reason}'
+                    )
+                    my_debug(r.text)
+                    raise HTTPError(
+                        500,
+                        'Permission failure checking authorization, I may need a new token'
+                    )
+                elif r.status_code >= 500:
+                    my_debug(f'Upstream failure verifying auth token: [{r.status_code}] {r.reason}')
+                    my_debug(r.text)
+                    raise HTTPError(
+                        502, 'Failed to check authorization (upstream problem)')
+                elif r.status_code >= 400:
+                    my_debug(f'Failed to check authorization: [{r.status_code}] {r.reason}')
+                    my_debug(r.text)
+                    raise HTTPError(500, 'Failed to check authorization')
+                else:
+                    data = r.json()
+                return data
+
+            @authenticated
+            def get(self):
+                user_model = self.get_current_user()
+                # Fetch current auth state
+                user_data = self.api_request('GET', url_path_join('users', user_model['name']))
+                auth_state = user_data['auth_state']
+                access_token = auth_state['access_token']
+                token_expires = auth_state['token_expires']
+
+                self.set_header('content-type', 'application/json')
+                self.write(json.dumps({'access_token': access_token, 'token_expires': token_expires}, indent=1, sort_keys=True))
+
+        class PingHandler(RequestHandler):
+
+            def get(self):
+                my_debug(f"DEBUG: In ping get")
+                self.set_header('content-type', 'application/json')
+                self.write(json.dumps({'ping': 1}))
+
+
+        def main():
+            app = Application([
+                (os.environ['JUPYTERHUB_SERVICE_PREFIX'] + 'tokens', RefreshHandler),
+                (os.environ['JUPYTERHUB_SERVICE_PREFIX'] + '/?', PingHandler),
+            ])
+
+            http_server = HTTPServer(app)
+            url = urlparse(os.environ['JUPYTERHUB_SERVICE_URL'])
+
+            http_server.listen(url.port)
+
+            IOLoop.current().start()
+
+        if __name__ == '__main__':
+            main()
+  networkPolicy:
+    ingress:
+      - ports:
+          - port: 8082
+        from:
+          - podSelector:
+              matchLabels:
+                hub.jupyter.org/network-access-hub: "true"
+  service:
+    extraPorts:
+      - port: 8082
+        targetPort: 8082
+        name: refresh-token
   extraEnv:
+    NEXTCLOUD_DEBUG_OAUTH: "no"
     NEXTCLOUD_HOST: sunet.drive.test.sunet.se
     JUPYTER_HOST: jupyter.drive.test.sunet.se
+    JUPYTERHUB_API_KEY:
+      valueFrom:
+        secretKeyRef:
+          name: jupyterhub-secrets
+          key: api-key
+    JUPYTERHUB_CRYPT_KEY:
+      valueFrom:
+        secretKeyRef:
+          name: jupyterhub-secrets
+          key: crypt-key
     NEXTCLOUD_CLIENT_ID:
       valueFrom:
         secretKeyRef:
@@ -59,12 +299,26 @@ hub:
         secretKeyRef:
           name: nextcloud-oauth-secrets
           key: client-secret
+    networkPolicy:
+      enabled: false
+proxy:
+  chp:
+    networkPolicy:
+      egress:
+        - to:
+            - podSelector:
+                matchLabels:
+                  app: jupyterhub
+                  component: hub
+          ports:
+            - port: 8082
 singleuser:
   image:
     name: docker.sunet.se/drive/jupyter-custom
-    tag: 2023-02-28-2
+    tag: lab-4.0.10-sunet2
   storage:
-    type: none
+    dynamic:
+      storageClass: csi-sc-cinderplugin
   extraEnv:
     JUPYTER_ENABLE_LAB: "yes"
   extraFiles:
