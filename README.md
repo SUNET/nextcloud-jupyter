@@ -9,7 +9,7 @@ Place this app in **nextcloud/custom_apps/**
 ## Configuring Nextcloud
 Install this app and configure it with OCC:
 ```
-occ jupyter:set-url <URL to Your JupyterHub>
+occ integration_jupyterhub:set-url <URL to Your JupyterHub>
 ```
 Or under Administration -> Additional settings
 
@@ -36,16 +36,7 @@ hub:
       from oauthenticator.generic import GenericOAuthenticator
       c.JupyterHub.authenticator_class = GenericOAuthenticator
       c.GenericOAuthenticator.client_id = '< Client Identity from Nextcloud goes here >'
-      c.GenericOAuthenticator.client_secret = '< Client secret from Nextclouid goes here >'
-      c.GenericOAuthenticator.login_service = '< Your Service Name goes here >'
-      c.GenericOAuthenticator.username_key = lambda r: r.get('ocs', {}).get('data', {}).get('id')
-      c.GenericOAuthenticator.userdata_url = 'https://<Nextcloud domain goes here>/ocs/v2.php/cloud/user?format=json'
-      c.GenericOAuthenticator.authorize_url = 'https://<Nextcloud domain goes here>/index.php/apps/oauth2/authorize'
-      c.GenericOAuthenticator.token_url = 'https://<Nextcloud domain goes here>/index.php/apps/oauth2/api/v1/token'
-      c.GenericOAuthenticator.oauth_callback_url = 'https://<Jupyter Hub domain goes here>/hub/oauth_callback'
-
-singleuser:
-  image:
+   image:
     name: jupyter/scipy-notebook
     tag: 2023-02-28
   extraFiles:
@@ -60,3 +51,4 @@ singleuser:
 
       mode: 0644
 ```
+A full configuration guide can be found here: https://wiki.sunet.se/pages/viewpage.action?pageId=178290700
