@@ -4,7 +4,7 @@
 
 /** @var \OCP\IL10N $l */
 /** @var array $_ */
-script('jupyter', 'settings-admin');
+script('integration_jupyterhub', 'settings-admin');
 ?>
 
 <div id="jupyterSettings" class="section">

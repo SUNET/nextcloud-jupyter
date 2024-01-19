@@ -5,13 +5,12 @@
 namespace OCA\Jupyter\Commands;
 
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use \OCP\IConfig;
 
 
-class SetUrl extends Command
+class GetUrl extends Command
 {
 
   private $config;
@@ -28,13 +27,8 @@ class SetUrl extends Command
   protected function configure()
   {
     $this
-      ->setName('jupyter:set-url')
-      ->setDescription('Sets the iframe url within the Jupyter app.')
-      ->addArgument(
-        'url',
-        InputArgument::REQUIRED,
-        'The url for the JupyterHub installation - will be shown as iframe inside of the Jupyter app.'
-      );
+      ->setName('integration_jupyterhub:get-url')
+      ->setDescription('Gets the iframe url from the database.');
   }
 
   /**
@@ -45,9 +39,8 @@ class SetUrl extends Command
    */
   protected function execute(InputInterface $input, OutputInterface $output)
   {
-    $url = $input->getArgument('url');
-    $this->config->setAppValue($this->appName, 'jupyter_url', $url);
-    $output->writeln("Set <$url> as jupyter_url successful.");
+    $url = $this->config->getAppValue($this->appName, 'jupyter_url');
+    $output->writeln($url);
     return 0;
   }
 }

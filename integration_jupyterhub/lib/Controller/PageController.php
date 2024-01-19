@@ -31,7 +31,7 @@ class PageController extends Controller
     IConfig      $config,
   ) {
     parent::__construct(Application::APP_ID, $request);
-    $this->appName = "jupyter";
+    $this->appName = "integration_jupyterhub";
     $this->userId = $userSession->getUser()->getUID();
     $this->jupyter_url = $config->getAppValue($this->appName, 'jupyter_url') . '/hub/home';
   }

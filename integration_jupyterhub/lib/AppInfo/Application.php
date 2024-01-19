@@ -8,7 +8,7 @@ namespace OCA\Jupyter\AppInfo;
 use OCP\AppFramework\App;
 
 class Application extends App {
-	public const APP_ID = 'jupyter';
+	public const APP_ID = 'integration_jupyterhub';
 
 	public function __construct() {
 		parent::__construct(self::APP_ID);

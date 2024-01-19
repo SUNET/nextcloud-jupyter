@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 $(document).ready(function() {
   $('#jupyter_submit').on('click', function(event) {
-    var app = "jupyter"
+    var app = "integration_jupyterhub"
     event.preventDefault();
     OC.msg.startSaving('#jupyterSettings .msg');
 

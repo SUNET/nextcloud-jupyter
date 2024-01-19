@@ -28,7 +28,7 @@ class AdminPanel implements ISettings
     IUserSession $userSession,
     IConfig      $config,
   ) {
-    $this->appName = "jupyter";
+    $this->appName = "integration_jupyterhub";
     $this->userSession = $userSession;
     $this->config = $config;
   }
