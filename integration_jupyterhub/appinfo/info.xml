@@ -5,8 +5,8 @@
     SPDX-FileCopyrightText: Mikael Nordin <kano@sunet.se>
     SPDX-License-Identifier: CC0-1.0
     -->
-  <id>jupyter</id>
-  <name>Jupyter</name>
+  <id>integration_jupyterhub</id>
+  <name>JupyterHub Integration</name>
   <summary>Integrate Jupyther Hub into Nextcloud</summary>
   <description>
     <![CDATA[Integrate Jupyther Hub into Nextcloud]]>
