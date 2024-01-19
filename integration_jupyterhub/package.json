@@ -1,0 +1,43 @@
+{
+  "name": "integration_jupyterhub",
+  "description": "Integrate Jupyther Hub into Nextcloud",
+  "version": "0.0.1",
+  "author": "Mikael Nordin <kano@sunet.se>",
+  "contributors": [],
+  "bugs": {
+    "url": "https://github.com/SUNET/nextcloud-jupyter/issues"
+  },
+  "license": "agpl",
+  "private": true,
+  "scripts": {
+    "build": "webpack --node-env production --progress",
+    "dev": "webpack --node-env development --progress",
+    "watch": "webpack --node-env development --progress --watch",
+    "serve": "webpack --node-env development serve --progress",
+    "lint": "eslint --ext .js,.vue jupyter/**/",
+    "lint:fix": "eslint --ext .js,.vue jupyter/**/ --fix",
+    "stylelint": "stylelint jupyter/css/*.css jupyter/css/*.scss jupyter/src/**/*.scss jupyter/src/**/*.vue",
+    "stylelint:fix": "stylelint jupyter/css/*.css jupyter/css/*.scss jupyter/src/**/*.scss jupyter/src/**/*.vue --fix"
+  },
+  "dependencies": {
+    "@nextcloud/axios": "^1.10.0",
+    "@nextcloud/dialogs": "^3.1.4",
+    "@nextcloud/router": "^2.0.0",
+    "@nextcloud/vue": "^5.4.0",
+    "vue": "^2.7.0"
+  },
+  "browserslist": [
+    "extends @nextcloud/browserslist-config"
+  ],
+  "engines": {
+    "node": "^16.0.0",
+    "npm": "^7.0.0 || ^8.0.0"
+  },
+  "devDependencies": {
+    "@nextcloud/babel-config": "^1.0.0",
+    "@nextcloud/browserslist-config": "^2.2.0",
+    "@nextcloud/eslint-config": "^8.0.0",
+    "@nextcloud/stylelint-config": "^2.1.2",
+    "@nextcloud/webpack-vue-config": "^5.2.1"
+  }
+}
