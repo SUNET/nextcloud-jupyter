@@ -4,7 +4,7 @@ project_dir=$(CURDIR)/$(app_name)
 build_dir=$(CURDIR)/build/artifacts
 sign_dir=$(build_dir)/sign
 package_name=$(app_name)
-version+=0.1.0
+version+=0.1.1
 
 all: appstore
 release: appstore

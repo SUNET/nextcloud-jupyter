@@ -1,8 +1,8 @@
 {
   "name": "integration_jupyterhub",
   "description": "Integrate Jupyther Hub into Nextcloud",
-  "version": "0.0.1",
-  "author": "Mikael Nordin <kano@sunet.se>",
+  "version": "0.1.1",
+  "author": "Micke Nordin <kano@sunet.se>",
   "contributors": [],
   "bugs": {
     "url": "https://github.com/SUNET/nextcloud-jupyter/issues"
