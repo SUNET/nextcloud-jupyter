@@ -31,6 +31,7 @@ sign: package
 	docker cp nextcloud:/var/www/html/custom_apps/$(app_name)-$(version).tar.gz $(build_dir)/$(app_name)-$(version).tar.gz
 	sleep 3
 	docker kill nextcloud
+	openssl dgst -sha512 -sign $(cert_dir)/$(app_name).key $(build_dir)/$(app_name)-0.1.1.tar.gz | openssl base64
 
 appstore: sign
 
