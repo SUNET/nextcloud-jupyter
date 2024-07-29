@@ -9,6 +9,18 @@ version+=0.1.0
 all: appstore
 release: appstore
 
+docker: package
+	docker run --rm --detach -p 8080:80 --name nextcloud nextcloud:latest
+	sleep 5
+	docker cp $(build_dir)/$(app_name)-$(version).tar.gz nextcloud:/var/www/html/custom_apps
+	docker exec -u www-data nextcloud /bin/bash -c "cd /var/www/html/custom_apps && tar -xzf $(app_name)-$(version).tar.gz && rm $(app_name)-$(version).tar.gz"
+	docker exec nextcloud /bin/bash -c "chown -R www-data:www-data /var/www/html/custom_apps/$(app_name)"
+	docker exec -u www-data nextcloud /bin/bash -c "/var/www/html/occ maintenance:install --admin-user='admin' --admin-pass='adminpassword'"
+	docker exec -u www-data nextcloud /bin/bash -c "/var/www/html/occ app:enable $(app_name)"
+	docker exec -u www-data nextcloud /bin/bash -c "/var/www/html/occ app:disable firstrunwizard"
+	docker exec -u www-data nextcloud /bin/bash -c "/var/www/html/occ log:manage --level 0"
+	firefox -new-tab http://127.0.0.1:8080/
+
 sign: package
 	docker run --rm --volume $(cert_dir):/certificates --detach --name nextcloud nextcloud:latest
 	sleep 5
