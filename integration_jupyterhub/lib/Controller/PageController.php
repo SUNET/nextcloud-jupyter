@@ -42,17 +42,6 @@ class PageController extends Controller
    */
   public function index(): TemplateResponse
   {
-    //Util::addScript(Application::APP_ID, 'jupyter-main');
-    $policy = new \OCP\AppFramework\Http\EmptyContentSecurityPolicy();
-
-    $parsed_url = parse_url($this->jupyter_url);
-
-    $http = $parsed_url["scheme"] . "://" . $parsed_url["host"];
-    $policy->addAllowedConnectDomain($http);
-    $policy->addAllowedScriptDomain($http);
-    $policy->addAllowedFrameDomain($http);
-    \OC::$server->getContentSecurityPolicyManager()->addDefaultPolicy($policy);
-
 
     $params = [
       'user_id' => $this->userId,
