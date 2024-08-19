@@ -1,10 +1,11 @@
 app_name=integration_jupyterhub
 cert_dir=$(HOME)/.nextcloud/certificates
+get_version = $(shell  grep /version $(app_name)/appinfo/info.xml | sed 's/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/')
 project_dir=$(CURDIR)/$(app_name)
 build_dir=$(CURDIR)/build/artifacts
 sign_dir=$(build_dir)/sign
 package_name=$(app_name)
-version+=0.1.2
+version := $(call get_version)
 
 all: appstore
 release: appstore
@@ -35,10 +36,26 @@ sign: package
 
 appstore: sign
 
+.PHONY: composer
+composer:
+	cd $(project_dir) && composer install --prefer-dist
+
+# Installs npm dependencies
+.PHONY: npm
+npm:
+	cd $(project_dir) && npm install
+	cd $(project_dir) && npm run build
+
+# Same as clean but also removes dependencies installed by composer, bower and
+# npm
+.PHONY: distclean
+distclean: clean
+	rm -rf $(project_dir)/vendor
+	rm -rf $(project_dir)/node_modules
 clean:
 	rm -rf $(build_dir)
 
-package: clean
+package: clean npm composer
 	mkdir -p $(sign_dir)
 	rsync -a \
 	--exclude=/build \

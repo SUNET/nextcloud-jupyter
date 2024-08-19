@@ -23,8 +23,8 @@ class CSPListener implements IEventListener
     private IConfig $config,
     private LoggerInterface $logger
   ) {
-    $this->jupyter_url = $config->getAppValue($this->appName, 'jupyter_url') . '/hub/home';
     $this->appName = "integration_jupyterhub";
+    $this->jupyter_url = $config->getAppValue($this->appName, 'jupyter_url') . '/hub/home';
   }
 
   public function handle(Event $event): void
