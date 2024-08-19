@@ -3,6 +3,8 @@
 .idea
 *.iml
 integration_jupyterhub/vendor/
+integration_jupyterhub/js/*
+integration_jupyterhub/node_modules/
 /build/
 node_modules/
 /.php_cs.cache
